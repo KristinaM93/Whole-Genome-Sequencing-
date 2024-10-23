@@ -1,6 +1,5 @@
 # Whole-Genome-Sequencing-
-markdown
-Copy code
+
 # Copy number variants (CNVs) and Structural variants (SVs) pipeline
 
 This repository provides a pipeline for structural variant (SV) analysis using a combination of popular bioinformatics tools: **BWA-MEM**, **GATK**, **Manta**, **bcftools**, **AnnotSV**, and **SVDB**. The pipeline allows users to align sequencing data, call structural variants, annotate variants, and analyze results effectively.
