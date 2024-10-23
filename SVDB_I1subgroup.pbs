@@ -1,0 +1,66 @@
+#!/bin/bash 
+#PBS -P UNITI
+#PBS -N SVDB
+#PBS -l select=1:ncpus=8:mem=123GB
+#PBS -l walltime=24:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load necessary modules (if any, e.g., a module for SVDB)
+module load python/3.9.15
+module load svdb
+
+# Set the working directory
+cd $PBS_O_WORKDIR
+
+# Define input and output directories
+INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/bcftools/filter"
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/SVDB/output/I1subgroup"
+
+
+# Define the output VCF file
+OUTPUT_VCF="${OUTPUT_DIR}/final.vcf.gz"
+
+# Find the specific VCF files in the input directory
+VCF_FILES=$(find $INPUT_DIR -type f \( \
+    -name "AT01*.vcf.gz" -o \
+    -name "AT02*.vcf.gz" -o \
+    -name "AT03*.vcf.gz" -o \
+    -name "AT04*.vcf.gz" -o \
+    -name "AT05*.vcf.gz" -o \
+    -name "AT11*.vcf.gz" -o \
+    -name "AT12*.vcf.gz" -o \
+    -name "AT14*.vcf.gz" -o \
+    -name "AT15*.vcf.gz" -o \
+    -name "AT16*.vcf.gz" -o \
+    -name "AT17*.vcf.gz" -o \
+    -name "AT19*.vcf.gz" -o \
+    -name "AT21*.vcf.gz" -o \
+    -name "BL02*.vcf.gz" -o \
+    -name "BL08*.vcf.gz" -o \
+    -name "BL09*.vcf.gz" -o \
+    -name "BL13*.vcf.gz" -o \
+    -name "LV06*.vcf.gz" -o \
+    -name "LV13*.vcf.gz" -o \
+    -name "LV14*.vcf.gz" -o \
+    -name "LV23*.vcf.gz" -o \
+    -name "LV27*.vcf.gz" -o \
+    -name "LV31*.vcf.gz" -o \
+    -name "LV38*.vcf.gz" -o \
+    -name "LV40*.vcf.gz" -o \
+    -name "LV46*.vcf.gz" -o \
+    -name "LV59*.vcf.gz" -o \
+    -name "LV63*.vcf.gz" \
+\))
+
+# Check if any VCF files were found
+if [ -z "$VCF_FILES" ]; then
+    echo "No matching VCF files found in $INPUT_DIR"
+    exit 1
+fi
+
+# Run SVDB to merge the VCF files with at least 60% overlap
+svdb --merge --vcf ${VCF_FILES} --overlap 0.6 > ${OUTPUT_VCF}
+
+# Print completion message
+echo "Merging and compression complete."

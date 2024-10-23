@@ -1,0 +1,56 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N ALIGNMENT
+#PBS -l select=1:ncpus=24:mem=123GB
+#PBS -l walltime=288:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load necessary modules
+module load bwa/0.7.17
+module load samtools/1.10
+
+# Set the number of threads
+THREADS=8
+
+# Define the reference genome
+REFERENCE=/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/fastq/genome/genome.fa
+
+# Change to the directory from which the job was submitted
+cd $PBS_O_WORKDIR
+
+# Define the directory containing the input files
+INPUT_DIR=/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles
+OUTPUT_DIR=${INPUT_DIR}/BWA-MEM
+
+# Create output directory if it doesn't exist
+#mkdir -p $OUTPUT_DIR
+
+# Loop through all files starting with UG and ending with .clean.fq.gz
+for READ1 in ${INPUT_DIR}/*_1.clean.fq.gz; do
+    # Derive READ2 from READ1
+    READ2=${READ1/_1.clean.fq.gz/_2.clean.fq.gz}
+    
+    # Check if READ2 exists
+    if [[ -f $READ2 ]]; then
+        # Derive output filenames
+        BASENAME=$(basename $READ1 _1.clean.fq.gz)
+        OUTPUT=${OUTPUT_DIR}/${BASENAME}_aligned.bam
+        SORTED_OUTPUT=${OUTPUT_DIR}/${BASENAME}_aligned_sorted.bam
+
+        # Perform BWA-MEM alignment and convert SAM to BAM
+        bwa mem -t $THREADS $REFERENCE $READ1 $READ2 | samtools view -bS - > $OUTPUT
+
+        # Sort the BAM file
+        samtools sort -@ $THREADS -o $SORTED_OUTPUT $OUTPUT
+
+        # Index the sorted BAM file
+        samtools index $SORTED_OUTPUT
+
+        echo "Alignment and BAM file generation completed for $BASENAME."
+    else
+        echo "Matching file for $READ1 not found. Skipping."
+    fi
+done
+
+echo "All alignments completed."

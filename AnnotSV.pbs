@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N AnnotSV
+#PBS -l select=1:ncpus=24:mem=100GB
+#PBS -l walltime=24:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load any necessary modules, e.g., for bedtools
+module load annotsv/2.1
+module load bedtools/2.29.2
+
+# Define the input directory and output directory
+INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/bcftools/filter"
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/AnnotSV/output"
+ANNOTSV_BIN="$ANNOTSV/bin/AnnotSV"
+BEDTOOLS_PATH="/usr/local/bedtools/2.29.2/bin/bedtools"
+
+# Loop over the files with the specified prefixes
+for FILE in "$INPUT_DIR"/*.vcf.gz
+do
+    # Get the base name of the file
+    BASENAME=$(basename "$FILE")
+
+    # Run AnnotSV while keeping the original file name in the output directory
+    "$ANNOTSV_BIN" -SVinputFile "$FILE" \
+                   -outputDir "$OUTPUT_DIR" \
+                   -outputFile "$BASENAME" \
+                   -typeOfAnnotation split \
+                   -bedtools "$BEDTOOLS_PATH" \
+                   -addCytoband \
+                   -addGeneSymbol \
+                   -addTranscriptID \
+                   -addOverlappedTranscriptLength \
+                   -addOverlappedCDSLength \
+                   -addLocationInGene \
+                   -acmg
+done

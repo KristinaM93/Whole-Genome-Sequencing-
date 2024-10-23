@@ -1,0 +1,68 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N GATK
+#PBS -l select=1:ncpus=24:mem=123GB
+#PBS -l walltime=288:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load necessary modules
+module load java/jdk1.8.0_212
+module load gatk/4.2.1.0
+module load samtools/1.10
+
+# Define file paths and other variables
+INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/samtools"
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/GATK/output"
+REFERENCE="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/fastq/genome/genome.fa"
+KNOWN_SITES="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/GATK/Homo_sapiens_assembly38.known_indels.vcf"
+
+# Create output directory if it doesn't exist
+#mkdir -p $OUTPUT_DIR
+
+# Index the known sites VCF file
+#gatk IndexFeatureFile -I $KNOWN_SITES
+
+# Process each BAM file in the input directory
+for INPUT_BAM in $INPUT_DIR/*.bam; do
+    BASENAME=$(basename $INPUT_BAM .bam)
+    
+    # MarkDuplicates
+    gatk --java-options "-Xmx30G" MarkDuplicatesSpark \
+         -I $INPUT_BAM \
+         -O $OUTPUT_DIR/${BASENAME}_deduped.bam \
+         -M $OUTPUT_DIR/${BASENAME}_marked_dup_metrics.txt
+
+    # Check if parts were created
+     if [ -d "$OUTPUT_DIR/${BASENAME}_deduped.bam.parts" ]; then
+    #     # Merge parts into a single BAM file
+         samtools merge $OUTPUT_DIR/${BASENAME}_deduped.bam $OUTPUT_DIR/${BASENAME}_deduped.bam.parts/*.bam
+    #     # Optionally, clean up parts directory
+         rm -r $OUTPUT_DIR/${BASENAME}_deduped.bam.parts
+     fi
+
+    # BaseRecalibrator with known sites
+    gatk --java-options "-Xmx30G" BaseRecalibrator \
+        -I $OUTPUT_DIR/${BASENAME}_deduped.bam \
+        -R $REFERENCE \
+        --known-sites $KNOWN_SITES \
+        -O $OUTPUT_DIR/${BASENAME}_recal_data.table
+
+    # ApplyBQSR
+    gatk --java-options "-Xmx30G" ApplyBQSR \
+        -R $REFERENCE \
+        -I $OUTPUT_DIR/${BASENAME}_deduped.bam \
+        --bqsr-recal-file $OUTPUT_DIR/${BASENAME}_recal_data.table \
+        -O $OUTPUT_DIR/${BASENAME}_recalibrated.bam
+
+    # Index the recalibrated BAM
+    samtools index $OUTPUT_DIR/${BASENAME}_recalibrated.bam
+
+    # HaplotypeCaller
+    gatk --java-options "-Xmx30G" HaplotypeCaller \
+        -R $REFERENCE \
+        -I $OUTPUT_DIR/${BASENAME}_recalibrated.bam \
+        -O $OUTPUT_DIR/${BASENAME}_raw_variants.vcf
+
+    echo "GATK pipeline completed successfully for $BASENAME."
+done

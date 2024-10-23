@@ -1,0 +1,33 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N BCFTOOLS
+#PBS -l select=1:ncpus=24:mem=100GB
+#PBS -l walltime=24:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load required modules
+module load bcftools
+
+# Define the base directory where the directories are located
+BASE_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/Manta/output"
+
+# Define output directory for the filtered files
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/bcftools/filter"
+
+# Find and process each diploidSV.vcf.gz file in the specified directory structure
+find $BASE_DIR -type f -path "*/results/variants/diploidSV.vcf.gz" | while read INPUT_VCF; do
+  # Extract the directory name (AT01*) from the file path
+  DIR_NAME=$(basename $(dirname $(dirname $(dirname $INPUT_VCF))))
+
+  # Define the output file name based on the directory name
+  OUTPUT_VCF="${OUTPUT_DIR}/${DIR_NAME}_filtered.vcf.gz"
+
+  # Filter variants by length (< 100,000 bp)
+  bcftools filter -i 'SVLEN < 100000' $INPUT_VCF -Oz -o $OUTPUT_VCF
+
+  # Index the output VCF file
+  bcftools index $OUTPUT_VCF
+
+  echo "Filtering complete for $INPUT_VCF. Output saved to $OUTPUT_VCF."
+done

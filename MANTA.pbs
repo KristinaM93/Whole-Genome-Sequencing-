@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N MANTA
+#PBS -l select=1:ncpus=24:mem=123GB
+#PBS -l walltime=288:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load necessary modules (customize based on your environment)
+module load manta/1.6.0
+
+# Define variables (customize these paths)
+REFERENCE=/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/fastq/genome/genome.fa
+OUTPUT_DIR=/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/Manta/output
+
+# Create output directory if it doesn't exist
+mkdir -p $OUTPUT_DIR
+
+# Loop over all BAM files starting with RG*_recalibrated.bam
+for BAM_FILE in /scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/GATK/output/*_recalibrated.bam; do
+    # Extract sample name from BAM file (optional)
+    SAMPLE_NAME=$(basename $BAM_FILE _recalibrated.bam)
+    SAMPLE_OUTPUT_DIR=$OUTPUT_DIR/$SAMPLE_NAME
+    mkdir -p $SAMPLE_OUTPUT_DIR
+    
+    # Run Manta configuration script
+    configManta.py --bam $BAM_FILE --referenceFasta $REFERENCE --runDir $SAMPLE_OUTPUT_DIR
+
+    # Run the workflow with 8 threads
+    $SAMPLE_OUTPUT_DIR/runWorkflow.py -m local -j 8
+done

@@ -1,0 +1,41 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N AnnotSV
+#PBS -l select=1:ncpus=24:mem=100GB
+#PBS -l walltime=24:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load any necessary modules, e.g., for bedtools
+module load annotsv/2.1
+module load bedtools/2.29.2
+
+# Define the input directory, output directory, and input file
+INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/SVDB/output/I4subgroup"
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/SVDB/output/I4subgroup/AnnotSV"
+ANNOTSV_BIN="$ANNOTSV/bin/AnnotSV"
+BEDTOOLS_PATH="/usr/local/bedtools/2.29.2/bin/bedtools"
+
+# Specify the single VCF.gz file to process
+INPUT_FILE="${INPUT_DIR}/final.vcf.gz"
+
+# Get the base name of the file
+BASENAME=$(basename "$INPUT_FILE")
+
+# Run AnnotSV on the single file
+"$ANNOTSV_BIN" -SVinputFile "$INPUT_FILE" \
+               -outputDir "$OUTPUT_DIR" \
+               -outputFile "$BASENAME" \
+               -typeOfAnnotation split \
+               -bedtools "$BEDTOOLS_PATH" \
+#               -addCytoband \
+               -addGeneSymbol \
+               -addTranscriptID \
+               -addOverlappedTranscriptLength \
+               -addOverlappedCDSLength \
+               -addLocationInGene \
+               -acmg
+
+# Print completion message
+echo "AnnotSV annotation complete for file $INPUT_FILE. Output written to $OUTPUT_DIR/$BASENAME"
+

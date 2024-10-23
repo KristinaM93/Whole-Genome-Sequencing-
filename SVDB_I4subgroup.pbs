@@ -1,0 +1,80 @@
+
+#!/bin/bash 
+#PBS -P UNITI
+#PBS -N SVDB_Merge
+#PBS -l select=1:ncpus=8:mem=123GB
+#PBS -l walltime=24:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load necessary modules (if any, e.g., a module for SVDB)
+module load python/3.9.15
+module load svdb
+
+# Set the working directory
+cd $PBS_O_WORKDIR
+
+# Define input and output directories
+INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/bcftools/filter"
+OUTPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/SVDB/output/I4subgroup"
+
+
+# Define the output VCF file
+OUTPUT_VCF="${OUTPUT_DIR}/final.vcf.gz"
+
+# Find the specific VCF files in the input directory
+VCF_FILES=$(find $INPUT_DIR -type f \( \
+    -name "AT06*.vcf.gz" -o \
+    -name "AT09*.vcf.gz" -o \
+    -name "AT18*.vcf.gz" -o \
+    -name "AT20*.vcf.gz" -o \
+    -name "AT23*.vcf.gz" -o \
+    -name "AT25*.vcf.gz" -o \
+    -name "AT27*.vcf.gz" -o \
+    -name "BL14*.vcf.gz" -o \
+    -name "BL16*.vcf.gz" -o \
+    -name "BL17*.vcf.gz" -o \
+    -name "LV01*.vcf.gz" -o \
+    -name "LV03*.vcf.gz" -o \
+    -name "LV08*.vcf.gz" -o \
+    -name "LV11*.vcf.gz" -o \
+    -name "LV15*.vcf.gz" -o \
+    -name "LV18*.vcf.gz" -o \
+    -name "LV25*.vcf.gz" -o \
+    -name "LV33*.vcf.gz" -o \
+    -name "LV36*.vcf.gz" -o \
+    -name "LV55*.vcf.gz" -o \
+    -name "LV71*.vcf.gz" -o \
+    -name "RG07*.vcf.gz" -o \
+    -name "RG09*.vcf.gz" -o \
+    -name "RG25*.vcf.gz" -o \
+    -name "RG26*.vcf.gz" -o \
+    -name "RG27*.vcf.gz" -o \
+    -name "RG48*.vcf.gz" -o \
+    -name "UG01*.vcf.gz" -o \
+    -name "UG08*.vcf.gz" -o \
+    -name "UG09*.vcf.gz" -o \
+    -name "UG15*.vcf.gz" -o \
+    -name "UG23*.vcf.gz" -o \
+    -name "UG53*.vcf.gz" -o \
+    -name "UG57*.vcf.gz" -o \
+    -name "UG62*.vcf.gz" -o \
+    -name "UG63*.vcf.gz" -o \
+    -name "UG67*.vcf.gz" -o \
+    -name "UG69*.vcf.gz" -o\
+    -name "UG70*.vcf.gz" \
+\))
+
+# Check if any VCF files were found
+if [ -z "$VCF_FILES" ]; then
+    echo "No matching VCF files found in $INPUT_DIR"
+    exit 1
+fi
+
+# Run SVDB to merge the VCF files with at least 60% overlap
+svdb --merge --vcf ${VCF_FILES} --overlap 0.6 > ${OUTPUT_VCF}
+
+
+# Print completion message
+echo "Merging and compression complete."
+

@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -P UNITI
+#PBS -N READ_GROUPS
+#PBS -l select=1:ncpus=24:mem=123GB
+#PBS -l walltime=288:00:00
+#PBS -q defaultQ
+#PBS -W umask=022
+
+# Load samtools module
+module load samtools/1.10
+
+# Specify input and output directories
+input_dir="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/BWA-MEM"
+output_dir="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/samtools"
+
+# Change to the input directory where the BAM files are located
+cd $input_dir
+
+# Function to extract read group information and add read groups to BAM files
+add_read_groups() {
+    local bam_file=$1
+    local basename=$(basename "$bam_file" .bam)
+
+    # Extract sample ID (assuming the format as per your examples)
+    local sample_id=$(echo $basename | cut -d'_' -f1)
+
+    # Construct read group information
+    local rg_id="ID:${sample_id}"
+    local rg_lb="LB:${sample_id}_lib"
+    local rg_pl="PL:ILLUMINA"
+    local rg_sm="SM:${sample_id}"
+    local rg_pu="PU:${sample_id}_unit"
+
+    # Add the read group
+    local output_bam="${output_dir}/${basename}_rg_added.bam"
+    samtools addreplacerg -r "@RG\t$rg_id\t$rg_lb\t$rg_pl\t$rg_sm\t$rg_pu" -o "$output_bam" "$bam_file"
+
+    # Index the output BAM file
+    samtools index "$output_bam"
+}
+
+# Loop through all BAM files starting with "AT" and ending with "_sorted.bam"
+for target_bam_file in ${input_dir}/*_sorted.bam; do
+    add_read_groups "$target_bam_file"
+done
