@@ -36,7 +36,7 @@ Before using this pipeline, ensure you have the following dependencies installed
 Clone this repository and set up the environment:
 
 ```bash
-git clone https://github.com/yourusername/sv-analysis-pipeline.git
+git clone https://github.com/KristinaM93/sv-analysis-pipeline.git
 cd sv-analysis-pipeline
 conda create -n sv-pipeline python=3.8
 conda activate sv-pipeline
