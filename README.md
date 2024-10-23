@@ -3,7 +3,7 @@ markdown
 Copy code
 # Structural Variant Analysis Pipeline
 
-This repository provides a pipeline for structural variant (SV) analysis using a combination of popular bioinformatics tools: **BWA-MEM**, **GATK**, **Manta**, **BCFtools**, **AnnotSV**, and **SVDB**. The pipeline allows users to align sequencing data, call structural variants, annotate variants, and analyze results effectively.
+This repository provides a pipeline for structural variant (SV) analysis using a combination of popular bioinformatics tools: **BWA-MEM**, **GATK**, **Manta**, **bcftools**, **AnnotSV**, and **SVDB**. The pipeline allows users to align sequencing data, call structural variants, annotate variants, and analyze results effectively.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ This repository provides a pipeline for structural variant (SV) analysis using a
 1. **BWA-MEM**: A fast and accurate algorithm for mapping low-divergent sequences against a large reference genome.
 2. **GATK (Genome Analysis Toolkit)**: A toolkit for variant discovery in high-throughput sequencing data.
 3. **Manta**: A tool for detecting structural variants from whole-genome and targeted sequencing data.
-4. **BCFtools**: A set of utilities for manipulating variant calls in the BCF and VCF formats.
+4. **bcftools**: A set of utilities for manipulating variant calls in the BCF and VCF formats.
 5. **AnnotSV**: A tool for annotating structural variants with various databases and resources.
 6. **SVDB**: A database of structural variants for comprehensive analysis.
 
@@ -52,7 +52,7 @@ The output directory will contain the following files:
 1. Aligned BAM files
 2. Variant call files (VCF)
 3. Annotated variant files
-4. Summary reports
+
 
 ## Contributing
 
