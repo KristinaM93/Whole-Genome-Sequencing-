@@ -1,14 +1,14 @@
 #!/bin/bash
 #PBS -P UNITI
-#PBS -N ALIGNMENT
+#PBS -N BWA-MEM
 #PBS -l select=1:ncpus=24:mem=123GB
 #PBS -l walltime=288:00:00
 #PBS -q defaultQ
 #PBS -W umask=022
 
 # Load necessary modules
-module load bwa/0.7.17
-module load samtools/1.10
+module load bwa 
+module load samtools 
 
 # Set the number of threads
 THREADS=8
