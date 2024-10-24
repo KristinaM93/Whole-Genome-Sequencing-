@@ -7,9 +7,9 @@
 #PBS -W umask=022
 
 # Load necessary modules
-module load java/jdk1.8.0_212
-module load gatk/4.2.1.0
-module load samtools/1.10
+module load java 
+module load gatk 
+module load samtools 
 
 # Define file paths and other variables
 INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/samtools"
