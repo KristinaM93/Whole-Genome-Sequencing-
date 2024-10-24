@@ -2,13 +2,13 @@
 #PBS -P UNITI
 #PBS -N AnnotSV
 #PBS -l select=1:ncpus=24:mem=100GB
-#PBS -l walltime=24:00:00
+#PBS -l walltime=288:00:00
 #PBS -q defaultQ
 #PBS -W umask=022
 
 # Load any necessary modules, e.g., for bedtools
-module load annotsv/2.1
-module load bedtools/2.29.2
+module load annotsv 
+module load bedtools 
 
 # Define the input directory, output directory, and input file
 INPUT_DIR="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/SVDB/output/I4subgroup"
@@ -28,7 +28,7 @@ BASENAME=$(basename "$INPUT_FILE")
                -outputFile "$BASENAME" \
                -typeOfAnnotation split \
                -bedtools "$BEDTOOLS_PATH" \
-#               -addCytoband \
+               -addCytoband \
                -addGeneSymbol \
                -addTranscriptID \
                -addOverlappedTranscriptLength \
