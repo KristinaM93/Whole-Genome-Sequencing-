@@ -2,7 +2,7 @@
 #PBS -P UNITI
 #PBS -N SVDB
 #PBS -l select=1:ncpus=8:mem=123GB
-#PBS -l walltime=24:00:00
+#PBS -l walltime=288:00:00
 #PBS -q defaultQ
 #PBS -W umask=022
 
