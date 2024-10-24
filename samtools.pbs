@@ -1,13 +1,13 @@
 #!/bin/bash
 #PBS -P UNITI
-#PBS -N READ_GROUPS
+#PBS -N SAMTOOLS
 #PBS -l select=1:ncpus=24:mem=123GB
 #PBS -l walltime=288:00:00
 #PBS -q defaultQ
 #PBS -W umask=022
 
 # Load samtools module
-module load samtools/1.10
+module load samtools
 
 # Specify input and output directories
 input_dir="/scratch/RDS-FMH-UNITI-RW/FASTQ_BAM_READS/gzfiles/BWA-MEM"
